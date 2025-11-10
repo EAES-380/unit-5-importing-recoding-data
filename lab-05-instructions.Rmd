@@ -58,7 +58,7 @@ Copy the code chunk below into Exercise 1 in the starter file.
 skim(earthquakes)
 ```
 
-1.  Add text narrative below the output explaining briefly why we are able to view `earthquakes` without first using a `read_()` function.
+1.  Add text narrative under Exercise 1 in your starter file, explaining briefly why we are able to view `earthquakes` without first using a `read_()` function.
 
 ### End of Exercise 1
 
