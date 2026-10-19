@@ -1,5 +1,5 @@
 ---
-title: "Lab 05 - Importing and recoding `earthquakes`"
+title: "Lab 05 - Importing and recoding earthquakes"
 output: 
   tufte::tufte_html:
     css: lab.css
@@ -9,39 +9,85 @@ link-citations: yes
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(eval = TRUE)
+knitr::opts_chunk$set(eval = FALSE)
 ```
 
-# Learning goals
+# Academic integrity and honor code
 
--   Know how to use read and write functions
--   Practice fixing variable names, types and recoding factors when reading
+This lab is designed to help you practice importing, cleaning, and recoding data in R. **Generative AI tools are not permitted for this assignment.** This includes ChatGPT, Claude, Gemini, Copilot, Grok, and similar tools that can generate or revise code, written answers, interpretations, or assignment content.
 
-```{r photo, fig.margin = TRUE, echo = FALSE, fig.width = 2, fig.cap = "Data Importing with readr and readxl", eval = TRUE}
+By completing and submitting this lab, I certify that:
+
+- I completed the submitted work myself.
+- I did not use generative AI to generate, debug, revise, or interpret code or written answers for this assignment.
+- I may use course materials, lecture notes, R documentation/help files, and other resources explicitly approved by the instructors.
+- I understand that I am responsible for being able to explain all code and written work that I submit.
+
+**Name:** ______________________________  
+**Signature:** ___________________________  
+**Date:** _______________________________
+
+> **Important:** Signing this statement is part of the assignment. The same statement appears in your starter file; complete it there as well.
+
+# Lab overview
+
+You will rebuild the `earthquakes` data frame from partial files and then practice fixing variable names, missing values, and factor levels while reading data.
+
+```{r photo, fig.margin = TRUE, echo = FALSE, fig.width = 2, fig.cap = "Data importing with readr and readxl", eval = TRUE}
 knitr::include_graphics("img/readr.png")
-knitr::include_graphics("img/readxl.png")
 ```
 
-## Warm up
+## Learning goals
 
-Before we introduce the data, let's warm up with some simple exercises.
+By the end of this lab, you should be able to:  
 
--   Update the YAML, changing the author name to your name, and **knit** the document. 🧶
--   Commit your changes with a meaningful commit message. ✅
--   Push your changes to GitHub.️ ⬆️
--   Go to your repo on GitHub and confirm that your changes are visible in your Rmd files.
+  A. **Import** CSV, tab-separated, and Excel files with the correct function.  
+  B. **Join** partial data frames and confirm the result against a known data frame.  
+  C. **Set** bad values to `NA` and clean variable names while reading.  
+  D. **Recode** a character value and coerce a column to numeric.  
+  E. **Re-level** a factor and confirm the order is preserved when writing to RDS.  
 
-## Data
+## Deliverable
 
-For this lab, we will be using the `earthquakes` dataset from the `{openintro}` package we have used before and we will also need `{tidyverse}` for some data wrangling.
+Complete **`lab-05-starter.Rmd`**. Your finished starter file should contain your code and written responses and should Knit successfully from top to bottom.
 
-## Packages
+**The instructions file tells you what to do; the starter file is where your assignment work belongs, except for completing the honor-code signature above.**
 
-The package `{readr}` is automatically loaded with the `tidyverse`.
-`{readxl}` is also part of the `tidyverse` but it is not automatically loaded.
-We'll also load `{skimr}` to get a detailed look at data frames and `{janitor}` to automate cleaning of variable names.
+## Reproducibility rule
 
-```{r load-packages, message = FALSE}
+Throughout EAES 380, your analysis should work **from top to bottom**. Code that works only because you previously ran something in the Console is not reproducible.
+
+**Knit frequently.**
+
+## Before asking for help
+
+First check spelling, parentheses, quotation marks, package loading, and chunk order. If you are still stuck, ask Dr. Gavin McNicol or TA Kayode Ayegbusi and show them the code and error message.
+
+# Getting started
+
+If you are reading a knitted copy of these instructions, treat the steps below as review.
+
+- Open the GitHub repository you want to copy and add `/generate` to the URL.
+- Under **Owner**, choose `EAES-380`. Do not choose your personal account.
+- Name the repository `unit-5-yourlastname` and keep it **Private**.
+- Clone it into a New Project from a GitHub Repo in [RStudio Cloud](https://rstudio.cloud).
+- Open `lab-05-instructions.Rmd` and Knit it.
+- Open `lab-05-starter.Rmd`. **This is the file you will complete.**
+
+# Warm-up: R Markdown + Git
+
+Open `lab-05-starter.Rmd`.  
+
+A. Replace `Insert your name here` with your name.  
+B. Replace `Insert date here` with today's date.  
+C. Complete and sign the honor-code statement.  
+D. Knit, then commit with a message such as `Update author and honor code` and push to GitHub.  
+
+# Packages and data
+
+The package `{readr}` is loaded with the tidyverse. `{readxl}` is part of the tidyverse but is not loaded automatically. `{skimr}` and `{janitor}` are also required.
+
+```{r load-packages-demo, message = FALSE}
 library(tidyverse)
 library(readxl)
 library(openintro)
@@ -49,141 +95,143 @@ library(skimr)
 library(janitor)
 ```
 
-# Lab Exercises
+```{marginfigure}
+We can use `package::function` or `package::object` to call a function or object from a specific package without loading the whole package.
+```
 
-First, let's look at `earthquakes` with `skim`.
-Copy the code chunk below into Exercise 1 in the starter file.
+# Exercises
 
-```{r inspect-earthquakes}
+For each exercise: complete the matching section in `lab-05-starter.Rmd`, run the code, and write any requested interpretation in complete sentences.
+
+## Exercise 1 — Why no read function?
+
+**Goal:** Explain how a package data object becomes available.
+
+Copy the chunk below into Exercise 1 and add text narrative explaining briefly why we can view `earthquakes` without first using a `read_()` function.
+
+```{r inspect-earthquakes, eval = FALSE}
 skim(earthquakes)
 ```
 
-1.  Add text narrative under Exercise 1 in your starter file, explaining briefly why we are able to view `earthquakes` without first using a `read_()` function.
+### Exercise 1 checkpoint
 
-### End of Exercise 1
+🧶 ✅ ⬆️ **Knit, commit, and push.** Suggested commit message: `Complete Exercise 1`.
 
-The `earthquake` version you have just viewed using `skim` is the final version.  
+## Exercise 2 — Import the three partial files
 
-We've provided three partial datasets in the `/data` folder of your RStudio project.  
+**Goal:** Read CSV, tab-separated, and Excel files with the appropriate function.
 
-Let's remake the original file.  
+The `earthquakes` object you just viewed is the finished version. Three partial files are in the `data/` folder of your project: `earthquakes-1.csv`, `earthquakes-2.txt`, and `earthquakes-3.xlsx`.
 
-2.  Identify the three partial datasets within the starter file `/data` folder of your your project directory (`earthquakes-1 to earthquakes-3`).  
+Insert a labeled code chunk under Exercise 2. Import each file with the correct function and assign the results like this: `earthquakes_1`, `earthquakes_2`, and `earthquakes_3`.
 
-* Insert a code chunk under Exercise 2 in your starter file. 
-* Import the three files into RStudio using three lines of code and an appropriate read function for each file. 
-* We give you some partial code below to get started on the first one.
-  + Update the label to reflect what you're doing in the code chunk.
-
-```{r label-me1, eval=FALSE}
+```{r import-partial, eval = FALSE}
 earthquakes_1 <- read_csv("data/___")
 ```
 
+## Exercise 3 — Compare the partial files and fix types
 
-### End of Exercise 2
+**Goal:** Identify what is missing and why a `col_types` argument is needed.
 
-3.  Write a labeled code chunk to view the imported data frames under Exercise 3 in your starter file, and comment with text narrative on:  
+Write a labeled code chunk that views the three imported data frames. In text narrative under the chunk, answer:
 
-* What is missing from each data frame when compared to the `openintro::earthquakes` version?  
-* What is strange about the `deaths` variable in the object you created when importing `earthquakes-3.xlsx`?  
-* Why will the code chunk below (labeled `coerce-earthquakes-3`) fix the problem with `deaths`?  
+- What is missing from each data frame compared with `openintro::earthquakes`?
+- What is strange about the `deaths` variable in the object created from `earthquakes-3.xlsx`?
+- Why does the code chunk below fix the problem with `deaths`?
 
-After you respond to these three prompts, make sure you copy the code chunk **below** into your starter file under your responses to exercise 3.
+Then copy the chunk below into your starter file under your responses.
 
-Notice that the syntax for `col_types` within `read_xlsx`, is slightly different compared to the syntax for `read_csv` or `read_txt`. Always check the function help page if you're not sure!  
-
-
-```{r coerce-earthquakes-3, message = F, warning = F}
+```{r coerce-earthquakes-3, eval = FALSE, message = FALSE, warning = FALSE}
 earthquakes_3 <- read_xlsx("data/earthquakes-3.xlsx", col_types = c("numeric", 
                                                                     "text",
                                                                     "numeric",
                                                                     "numeric"))
 ```
 
-### End of Exercise 3
+### Exercise 3 checkpoint
 
-**Note:** We can use `package::function` or `package::object` when specifying (exactly) a function or object from a particular package.
+🧶 ✅ ⬆️ **Knit, commit, and push.** Suggested commit message: `Complete Exercises 2 and 3`.
 
-4.  Insert a labeled code chunk that uses a pipeline of **join** functions to merge the data from the three partial datasets.  
+## Exercise 4 — Join the partial files
 
-* Don't assign the output to anything.
-* Pipe the joined data into `skim()`.
-* Finally, confirm the output roughly matches that of the `inspect-earthquakes` chunk at the start of this lab.
+**Goal:** Combine the three partial data frames and confirm the result.
 
-🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message.*
+Insert a labeled code chunk that uses a pipeline of **join** functions to merge the three partial data frames. Do not assign the output. Pipe the joined result into `skim()`. Confirm the output roughly matches the `inspect-earthquakes` chunk from the start of the lab.
 
-### End of Exercise 4
+### Exercise 4 checkpoint
 
-For Exercises 5-10, you will practice using the importing functionality covered in lecture.  
+🧶 ✅ ⬆️ **Knit, commit, and push.** Suggested commit message: `Complete Exercise 4`.
 
-We have provided labeled code chunks and limited code that you should copy into the starter file, but the rest is up to you!  
+## Exercise 5 — Read and glimpse the bad-names file
 
+**Goal:** Import a file with problem names and values and inspect it.
 
-5.  Write a pipeline that first reads `earthquakes-badnames-na.csv` into RStudio using an appropriate function, and then provides a glimpse of the dataset. Use the code below to get you started.
+Write a pipeline that reads `earthquakes-badnames-na.csv` and provides a glimpse.
 
-```{r read-inspect, eval = F}
+```{r read-inspect, eval = FALSE}
 read_csv("___/earthquakes-badnames-na.csv") %>% 
   glimpse()
 ```
 
-### End of Exercise 5
+## Exercise 6 — Set bad values to NA
 
-6.  Complete and add to the code below such that `earthquakes-badnames-na.csv` is read into RStudio and that **sets** any bad values ("." and "NA") to `NA`.
+**Goal:** Treat non-numeric placeholders as missing while reading.
 
-```{r fix-nas, eval = F}
+Complete and add to the code below so that `earthquakes-badnames-na.csv` is read and any bad values (`"."` and `"NA"`) are set to `NA`.
+
+```{r fix-nas, eval = FALSE}
 read_csv("___/earthquakes-badnames-na.csv") 
 ```
 
-### End of Exercise 6
+## Exercise 7 — Clean variable names
 
-7.  Copy your code from exercise 6 above into the next exercise 7 chunk labeled `fix-names`.  
+**Goal:** Fix non-syntactic column names in the same pipeline.
 
-* Start a pipeline whose first step is to fix the variable names in the data frame.
-* You will first have to identify any problems with the names.
+Copy your code from Exercise 6 into the next chunk. Add a step that cleans the variable names. You will first have to identify the problems with the names.
 
-```{r fix-names, message = F, warning = F}
-
+```{r fix-names, eval = FALSE, message = FALSE, warning = FALSE}
+# Your pipeline here
 ```
 
-### End of Exercise 7
+## Exercise 8 — Recode and coerce richter
 
-8.  Copy your code from exercise 7 into the next exercise 8 chunk labeled `fix-richter`.  
+**Goal:** Replace a character value and convert the column to numeric.
 
-* Using `mutate` and `case_when()`, add to the pipeline so that the bad values in the variable `richter` ("seven") are corrected.
-* Then **coerce** the entire column to type numeric.
+Copy your code from Exercise 7 into the next chunk. Using `mutate()` and `case_when()`, correct the bad value `"seven"` in `richter`, then coerce the entire column to numeric.
 
-```{r fix-richter, message = F, warning = F}
-
+```{r fix-richter, eval = FALSE, message = FALSE, warning = FALSE}
+# Your pipeline here
 ```
 
-### End of Exercise 8
+## Exercise 9 — Re-level month and confirm
 
-9.  Copy your code from exercise 8 into the next exercise 9 labeled `revlevel-month`.  
+**Goal:** Set month levels to calendar order and confirm with `count()`.
 
-* Add to the mutate function so that the default alphabetical ordering of the `month` variable is re-leveled to match the natural ordering of the months (January through December).
-* Assign the new output to `earthquakes_correct`. 
-* Add a second, short pipeline that takes `earthquakes_correct` as input and applies the `count()` function.
-* Use the output to confirm that the `month` factor levels are ordered correctly.
+Copy your code from Exercise 8 into the next chunk. Add to the `mutate()` so that the default alphabetical ordering of `month` is re-leveled to the natural order (January through December). Assign the result to `earthquakes_correct`. Add a second short pipeline that takes `earthquakes_correct` and applies `count()` so you can confirm the factor levels are ordered correctly.
 
-```{r relevel-month, message = F, warning = F}
-
+```{r relevel-month, eval = FALSE, message = FALSE, warning = FALSE}
+# Your pipeline here
 ```
 
-### End of Exercise 9
+## Exercise 10 — Write and read RDS
 
-10. Write a new short a pipeline that writes `earthquakes_correct` as an `.rds` file.  
+**Goal:** Confirm that factor order is preserved in an RDS file.
 
-* In a separate pipeline, use `readRDS` to read the file back in.
-* Use count() again to confirm that the ordering of `month` is retained in an RDS file.
+Write a short pipeline that writes `earthquakes_correct` as an `.rds` file. In a separate pipeline, use `readRDS()` to read the file back in. Use `count()` again to confirm that the ordering of `month` is retained.
 
-```{r write-read-rds, message = F, warning = F}
-
+```{r write-read-rds, eval = FALSE, message = FALSE, warning = FALSE}
+# Your pipelines here
 ```
 
-### End of Exercise 10
+### Exercise 10 checkpoint
 
-Great work!
-You just built an elaborate pipeline that combined importing, wrangling, and writing functions!
+🧶 ✅ ⬆️ Knit, commit, and push with a message such as `Complete Lab 5`. Confirm the latest files are on GitHub.
 
-You are finished with Lab 5!
-🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message.*
+# Submission checklist
+
+- [ ] I signed the academic-integrity statement in both files.
+- [ ] My name and date are correct in the starter YAML.
+- [ ] I answered every requested question in complete sentences.
+- [ ] All required code is in `lab-05-starter.Rmd`.
+- [ ] The document Knits from top to bottom without errors.
+- [ ] I committed and pushed the final version to GitHub.
