@@ -2,7 +2,7 @@
 
 This repo contains:
 
-Lab 05 - Import, Recode Data
-Hw 05 - US Weather Data
+Lab 05 - Import, Recode Data (earthquakes)
+Hw 05 - US Weather Data (tornadoes)
 
-v. Fall 2025
+v. Fall 2026
